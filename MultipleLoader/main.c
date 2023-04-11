@@ -1,4 +1,5 @@
 #include "utils.h"
+#include "PlatformAndDevices.h"
 
 #define CL_TARGET_OPENCL_VERSION 220
 #include <CL/cl.h>
@@ -16,41 +17,20 @@ typedef struct vectors{
 
 int main(void)
 {
-    cl_int error_code; //For error code handling
-
-    // Get platform
-    cl_uint n_platforms;
-	cl_platform_id platform_id;
-    error_code = clGetPlatformIDs(1, &platform_id, &n_platforms);
-	if (error_code != CL_SUCCESS) {
-		printf("[ERROR] Error calling clGetPlatformIDs. Error code: %d\n", error_code);
-		return 0;
-	}
-
-    // Get device
-	cl_device_id device_id;
-	cl_uint n_devices;
-	error_code = clGetDeviceIDs(
-		platform_id,
-		CL_DEVICE_TYPE_GPU,
-		1,
-		&device_id,
-		&n_devices
-	);
-	if (error_code != CL_SUCCESS) {
-		printf("[ERROR] Error calling clGetDeviceIDs. Error code: %d\n", error_code);
-		return 0;
-	}
+    cl_int error_code;
+    //Create device and platform
+    PlatformAndDevices_t pad;
+    mlGetPlatformAndDevices(&pad);
 
     // Create OpenCL context
-    cl_context context = clCreateContext(NULL, n_devices, &device_id, NULL, NULL, NULL);
+    cl_context context = clCreateContext(NULL, pad.n_devices, &(pad.device_id), NULL, NULL, NULL);
 
     //Build program 
-    cl_program program = program_builder("kernels/sample.cl",&error_code, device_id, context);
+    cl_program program = program_builder("kernels/sample.cl",pad.device_id, context);
     
     cl_kernel kernel = clCreateKernel(program, "vector_sum", &error_code);
     if (error_code == CL_INVALID_PROGRAM)
-        printf("Something's up boss: %d\n", error_code);
+        printf("Invalid Porgram: %d\n", error_code);
 
     // Create the host buffer and initialize it
     Vectors v;
@@ -72,7 +52,7 @@ int main(void)
     clSetKernelArg(kernel, 3, sizeof(int), (void*)&SAMPLE_SIZE);
 
     // Create the command queue
-    cl_command_queue command_queue = clCreateCommandQueue(context, device_id, NULL, NULL);
+    cl_command_queue command_queue = clCreateCommandQueue(context, pad.device_id, NULL, NULL);
 
     // Host buffer -> Device buffer
     clEnqueueWriteBuffer(
@@ -138,7 +118,7 @@ int main(void)
     clReleaseKernel(kernel);
     clReleaseProgram(program);
     clReleaseContext(context);
-    clReleaseDevice(device_id);
+    clReleaseDevice(pad.device_id);
 
     free(v.a);
     free(v.b);

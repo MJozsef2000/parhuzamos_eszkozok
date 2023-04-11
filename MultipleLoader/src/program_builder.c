@@ -6,13 +6,14 @@
 
 #define CL_TARGET_OPENCL_VERSION 220
 
-cl_program program_builder(const char *const path, cl_int* error_code, cl_device_id device_id, cl_context context)
+cl_program program_builder(const char *const path, cl_device_id device_id, cl_context context)
 {
+  cl_int error_code;
   // Build the program
   const char *kernel_code = load_kernel_source(path, &error_code);
   if (error_code != 0)
   {
-    printf("Source code loading error! %s with error: %d\n",path,&error_code);
+    printf("Source code loading error! Source mistake? (%s)\nwith error: %d\n",path,error_code);
     return 0;
   }
   cl_program program = clCreateProgramWithSource(context, 1, &kernel_code, NULL, NULL);
