@@ -1,6 +1,8 @@
 #include "utils.h"
 #include "PlatformAndDevices.h"
 #include "vectors.h"
+#include "SizeSpec.h"
+#include "ClWrapper.h"
 
 #define CL_TARGET_OPENCL_VERSION 220
 #define SIZEOF sizeof(int)
@@ -9,82 +11,58 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-const int SAMPLE_SIZE = 5;
+const cl_int SAMPLE_SIZE = 5;
 
 int main(void)
 {
-    cl_int error_code;
-    // Create device and platform
-    PlatformAndDevices_t pad;
-    mlGetPlatformAndDevices(&pad);
-    // Create OpenCL context
-    cl_context context = clCreateContext(NULL, pad.n_devices, &(pad.device_id), NULL, NULL, NULL);
-    // Build program
-    cl_program program = program_builder("kernels/sample.cl", pad.device_id, context);
-    // Pass program and the function's name
-    cl_kernel kernel = clCreateKernel(program, "vector_sum", &error_code);
-    if (error_code != CL_SUCCESS)
-        printf("Kernel building failed: %d\n", error_code);
+    ClWrapper_t cw = mlInit("kernels/sample.cl","vector_sum");
     // Initialize kernel arguments
-    Vectors v;
-    v.a = (int *)malloc(SAMPLE_SIZE * sizeof(int));
-    v.b = (int *)malloc(SAMPLE_SIZE * sizeof(int));
-    v.c = (int *)malloc(SAMPLE_SIZE * sizeof(int));
-    for (int i = 0; i < SAMPLE_SIZE; i++)
-    {
-        v.a[i] = i;
-        v.b[i] = i + 2;
+    Vector vs[SAMPLE_SIZE];
+    for(int i=0; i<5; i++){
+        vs[i].a = (cl_int)malloc(sizeof(cl_int));
+        vs[i].b = (cl_int)malloc(sizeof(cl_int));
+        vs[i].c = (cl_int)malloc(sizeof(cl_int));
+        vs[i].a = i;
+        vs[i].b = i + 2;
+        vs[i].n = SAMPLE_SIZE;
+    }
+
+    Vector vs2[SAMPLE_SIZE];
+    for(int i=0; i<5; i++){
+        vs2[i].a = (cl_int)malloc(sizeof(cl_int));
+        vs2[i].b = (cl_int)malloc(sizeof(cl_int));
+        vs2[i].c = (cl_int)malloc(sizeof(cl_int));
+        vs2[i].a = i + 1;
+        vs2[i].b = i + 3;
+        vs2[i].n = SAMPLE_SIZE;
     }
     // Create the device buffer
-    cl_mem buffers[4];
-    buffers[0] = clCreateBuffer(context, CL_MEM_READ_WRITE, SAMPLE_SIZE * sizeof(int), NULL, NULL);
-    buffers[1] = clCreateBuffer(context, CL_MEM_READ_WRITE, SAMPLE_SIZE * sizeof(int), NULL, NULL);
-    buffers[2] = clCreateBuffer(context, CL_MEM_READ_WRITE, SAMPLE_SIZE * sizeof(int), NULL, NULL);
+    const int buffer_count = 2;
+    cl_mem buffers[buffer_count];
+    buffers[0] = clCreateBuffer(cw.context, CL_MEM_READ_WRITE, SAMPLE_SIZE * sizeof(Vector), NULL, NULL);
+    buffers[1] = clCreateBuffer(cw.context, CL_MEM_READ_WRITE, SAMPLE_SIZE * sizeof(Vector), NULL, NULL);
     
-    mlInitKernel(
-        kernel,
-        context,
-        buffers,
-        SAMPLE_SIZE);
+    mlInitKernel(cw.kernel, cw.context, buffers, buffer_count);
 
     // Create the command queue
-    cl_command_queue command_queue = clCreateCommandQueue(context, pad.device_id, NULL, NULL);
+    cl_command_queue command_queue = clCreateCommandQueue(cw.context, cw.pad.device_id, NULL, NULL);
 
     // Host buffer -> Device buffer
-    clEnqueueWriteBuffer(
-        command_queue,
-        buffers[0],                  // changed
-        CL_FALSE,
-        0,
-        SAMPLE_SIZE * sizeof(int), // changed
-        v.a,                       // changed
-        0,
-        NULL,
-        NULL);
-    clEnqueueWriteBuffer(
-        command_queue,
-        buffers[1],                  // changed
-        CL_FALSE,
-        0,
-        SAMPLE_SIZE * sizeof(int), // changed
-        v.b,                       // changed
-        0,
-        NULL,
-        NULL);
+    void * ptrs[2];
+    ptrs[0] = vs;
+    ptrs[1] = vs2;
+    mlInputToDevice(command_queue, buffers, buffer_count, SAMPLE_SIZE * sizeof(Vector), ptrs);
 
-    // Size specification
-    size_t local_work_size = 256; // Local id 0-255 ig
-    size_t n_work_groups = (SAMPLE_SIZE + local_work_size + 1) / local_work_size;
-    size_t global_work_size = n_work_groups * local_work_size;
-
+    // Size specification (int nr_of_computations)
+    SizeSpec_t s = mlSizeSpecification(SAMPLE_SIZE);
     // Apply the kernel on the range
     clEnqueueNDRangeKernel(
         command_queue,
-        kernel,
+        cw.kernel,
         1,
         NULL,
-        &global_work_size,
-        &local_work_size,
+        &(s.global_work_size),
+        &(s.local_work_size),
         0,
         NULL,
         NULL);
@@ -94,27 +72,41 @@ int main(void)
     // OUTPUT
     clEnqueueReadBuffer(
         command_queue,
-        buffers[2],                   // changed
+        buffers[0],                   // changed
         CL_TRUE,
         0,
-        SAMPLE_SIZE * sizeof(int),  // changed
-        v.c,                        // changed
+        SAMPLE_SIZE * sizeof(Vector),  // changed
+        vs,                             // changed
+        0,
+        NULL,
+        NULL);
+    clEnqueueReadBuffer(
+        command_queue,
+        buffers[1],                   // changed
+        CL_TRUE,
+        0,
+        SAMPLE_SIZE * sizeof(Vector),  // changed
+        vs2,                             // changed
         0,
         NULL,
         NULL);
     for (int i = 0; i < SAMPLE_SIZE; i++)
     {
-        printf("[%d]: %d,", i, v.a[i]);
-        printf("[%d]: %d,", i, v.b[i]);
-        printf("[%d]: %d,\n", i, v.c[i]);
+        printf("[%d]: %d,", i, vs[i].a);
+        printf("[%d]: %d,", i, vs[i].b);
+        printf("[%d]: %d,\n", i, vs[i].c);
+    }
+    for (int i = 0; i < SAMPLE_SIZE; i++)
+    {
+        printf("[%d]: %d,", i, vs2[i].a);
+        printf("[%d]: %d,", i, vs2[i].b);
+        printf("[%d]: %d,\n", i, vs2[i].c);
     }
     // Release the resources
-    clReleaseKernel(kernel);
-    clReleaseProgram(program);
-    clReleaseContext(context);
-    clReleaseDevice(pad.device_id);
+    clReleaseKernel(cw.kernel);
+    clReleaseProgram(cw.program);
+    clReleaseContext(cw.context);
+    clReleaseDevice(cw.pad.device_id);
 
-    free(v.a);
-    free(v.b);
-    free(v.c);
+    free(vs);
 }

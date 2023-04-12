@@ -6,12 +6,11 @@
 
 #define CL_TARGET_OPENCL_VERSION 220
 
-void mlInitKernel(cl_kernel kernel, cl_context context, cl_mem buffers[], int nr_of_ops)
+void mlInitKernel(cl_kernel kernel, cl_context context, cl_mem buffers[], int buffer_count)
 {
-  // Set kernel arguments
-  clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&buffers[0]);
-  clSetKernelArg(kernel, 1, sizeof(cl_mem), (void *)&buffers[1]);
-  clSetKernelArg(kernel, 2, sizeof(cl_mem), (void *)&buffers[2]);
-  clSetKernelArg(kernel, 3, sizeof(int), (void *)&nr_of_ops);
+  int i;
+  for (i = 0; i<buffer_count; i++){
+    clSetKernelArg(kernel, i, sizeof(cl_mem), (void *)&buffers[i]);
+  }
   return;
 }

@@ -1,5 +1,8 @@
 {
   "files.associations": {
-    "stdio.h": "c"
+    "stdio.h": "c",
+    "cl.h": "c",
+    "platformanddevices.h": "c",
+    "sizespec.h": "c"
   }
 }
