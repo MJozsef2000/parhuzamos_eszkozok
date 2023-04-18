@@ -2,9 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <CL/cl.h>
-
 #define CL_TARGET_OPENCL_VERSION 220
+#include <CL/cl.h>
 
 void mlInitKernel(cl_kernel kernel, cl_context context, cl_mem buffers[], int buffer_count)
 {

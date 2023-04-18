@@ -5,7 +5,6 @@
 #include "ClWrapper.h"
 
 #define CL_TARGET_OPENCL_VERSION 220
-#define SIZEOF sizeof(int)
 #include <CL/cl.h>
 
 #include <stdio.h>
@@ -36,7 +35,7 @@ int main(void)
         vs2[i].b = i + 3;
         vs2[i].n = SAMPLE_SIZE;
     }
-    // Create the device buffer
+    // Create the device buffer for input and output data
     const int buffer_count = 2;
     cl_mem buffers[buffer_count];
     buffers[0] = clCreateBuffer(cw.context, CL_MEM_READ_WRITE, SAMPLE_SIZE * sizeof(Vector), NULL, NULL);
@@ -45,51 +44,23 @@ int main(void)
     mlInitKernel(cw.kernel, cw.context, buffers, buffer_count);
 
     // Create the command queue
-    cl_command_queue command_queue = clCreateCommandQueue(cw.context, cw.pad.device_id, NULL, NULL);
+    cl_command_queue command_queue = clCreateCommandQueueWithProperties(cw.context, cw.pad.device_id, NULL, NULL);
 
     // Host buffer -> Device buffer
     void * ptrs[2];
     ptrs[0] = vs;
     ptrs[1] = vs2;
-    mlInputToDevice(command_queue, buffers, buffer_count, SAMPLE_SIZE * sizeof(Vector), ptrs);
 
+    // INPUT
+    mlInputToDevice(command_queue, buffers, buffer_count, SAMPLE_SIZE * sizeof(Vector), ptrs);
     // Size specification (int nr_of_computations)
     SizeSpec_t s = mlSizeSpecification(SAMPLE_SIZE);
     // Apply the kernel on the range
-    clEnqueueNDRangeKernel(
-        command_queue,
-        cw.kernel,
-        1,
-        NULL,
-        &(s.global_work_size),
-        &(s.local_work_size),
-        0,
-        NULL,
-        NULL);
-    clFinish(command_queue);
+    mlExecComandQueue(command_queue, cw, s);
     // Host buffer <- Device buffer
-
     // OUTPUT
-    clEnqueueReadBuffer(
-        command_queue,
-        buffers[0],                   // changed
-        CL_TRUE,
-        0,
-        SAMPLE_SIZE * sizeof(Vector),  // changed
-        vs,                             // changed
-        0,
-        NULL,
-        NULL);
-    clEnqueueReadBuffer(
-        command_queue,
-        buffers[1],                   // changed
-        CL_TRUE,
-        0,
-        SAMPLE_SIZE * sizeof(Vector),  // changed
-        vs2,                             // changed
-        0,
-        NULL,
-        NULL);
+    mlOutputFromDevice(command_queue, buffers, buffer_count, SAMPLE_SIZE * sizeof(Vector), ptrs);
+    
     for (int i = 0; i < SAMPLE_SIZE; i++)
     {
         printf("[%d]: %d,", i, vs[i].a);
@@ -107,6 +78,6 @@ int main(void)
     clReleaseProgram(cw.program);
     clReleaseContext(cw.context);
     clReleaseDevice(cw.pad.device_id);
-
     free(vs);
+    free(vs2);
 }
