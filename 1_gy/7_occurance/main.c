@@ -7,10 +7,6 @@
 
 int main(void)
 {
-    printf("Reverse an array:\n\n");
-    reverse();
-    printf("\nSwitch odd and even indexed elements:\n\n");
-    swap();
     printf("\nOccurance:\n\n");
     occurance();
 }
