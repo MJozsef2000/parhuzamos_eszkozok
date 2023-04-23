@@ -17,9 +17,6 @@ int main(void)
     ClWrapper_t cw = mlInit("kernels/sample.cl","vector_sum");
     // Initialize kernel arguments
     Vector vs;
-    vs.a = (cl_int*)malloc(SAMPLE_SIZE * sizeof(cl_int));
-    vs.b = (cl_int*)malloc(SAMPLE_SIZE * sizeof(cl_int));
-    vs.c = (cl_int*)malloc(SAMPLE_SIZE * sizeof(cl_int));
     vs.n = SAMPLE_SIZE;
     for(int i=0; i<SAMPLE_SIZE; i++){
         vs.a[i] = i;
@@ -44,7 +41,7 @@ int main(void)
 
     // INPUT
     mlInputToDevice(command_queue, buffers, buffer_count, sizeof(Vector), i_ptrs);
-    // Size specification (int nr_of_computations)
+    // Size specification (Number of threads, number of subtrheads)
     SizeSpec_t s = mlSizeSpecification1D(10,2);
     // Apply the kernel on the range
     mlExecComandQueue(command_queue, cw, s);
