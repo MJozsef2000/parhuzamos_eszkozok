@@ -1,2 +1,2 @@
 all:
-	gcc main.c src/kernel_loader.c -o main.exe -Iinclude -lOpenCL
+	gcc main.c src\reverse.c src\swap.c -o main.exe -Iinclude ./ml.a -lOpenCL 
