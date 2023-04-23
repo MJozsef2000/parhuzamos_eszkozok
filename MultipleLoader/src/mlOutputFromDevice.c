@@ -20,7 +20,7 @@ void mlOutputFromDevice(cl_command_queue command_queue, cl_mem output_buffers[],
         NULL,
         NULL);
         if (error_code != CL_SUCCESS){
-          printf("Error while reading from device! Error code: %d", error_code);
+          printf("Error while reading from device! Error code: %d\n", error_code);
         }
   }
   return;

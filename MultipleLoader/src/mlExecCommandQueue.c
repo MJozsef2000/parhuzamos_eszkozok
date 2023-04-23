@@ -10,15 +10,18 @@
 
 
 void mlExecComandQueue(cl_command_queue command_queue, ClWrapper_t cw, SizeSpec_t s){
-    clEnqueueNDRangeKernel(
+    cl_int error = clEnqueueNDRangeKernel(
         command_queue,
         cw.kernel,
-        1,
+        s.dim,
         NULL,
-        &(s.global_work_size),
-        &(s.local_work_size),
+        s.global_size,
+        s.local_size,
         0,
         NULL,
         NULL);
+    if (error != CL_SUCCESS)
+        printf("Error while applying Kernel on range: %d\n", error);
+
 clFinish(command_queue);
 }

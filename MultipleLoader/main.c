@@ -16,68 +16,50 @@ int main(void)
 {
     ClWrapper_t cw = mlInit("kernels/sample.cl","vector_sum");
     // Initialize kernel arguments
-    Vector vs[SAMPLE_SIZE];
-    for(int i=0; i<5; i++){
-        vs[i].a = (cl_int)malloc(sizeof(cl_int));
-        vs[i].b = (cl_int)malloc(sizeof(cl_int));
-        vs[i].c = (cl_int)malloc(sizeof(cl_int));
-        vs[i].a = i;
-        vs[i].b = i + 2;
-        vs[i].n = SAMPLE_SIZE;
-    }
-
-    Vector vs2[SAMPLE_SIZE];
-    for(int i=0; i<5; i++){
-        vs2[i].a = (cl_int)malloc(sizeof(cl_int));
-        vs2[i].b = (cl_int)malloc(sizeof(cl_int));
-        vs2[i].c = (cl_int)malloc(sizeof(cl_int));
-        vs2[i].a = i + 1;
-        vs2[i].b = i + 3;
-        vs2[i].n = SAMPLE_SIZE;
+    Vector vs;
+    vs.a = (cl_int*)malloc(SAMPLE_SIZE * sizeof(cl_int));
+    vs.b = (cl_int*)malloc(SAMPLE_SIZE * sizeof(cl_int));
+    vs.c = (cl_int*)malloc(SAMPLE_SIZE * sizeof(cl_int));
+    vs.n = SAMPLE_SIZE;
+    for(int i=0; i<SAMPLE_SIZE; i++){
+        vs.a[i] = i;
+        vs.b[i] = i + 2;
+        vs.c[i] = 0;
     }
     // Create the device buffer for input and output data
-    const int buffer_count = 2;
+    const int buffer_count = 1;
+    const int input_param_count = 1;
+    const int output_param_count = 1;
     cl_mem buffers[buffer_count];
-    buffers[0] = clCreateBuffer(cw.context, CL_MEM_READ_WRITE, SAMPLE_SIZE * sizeof(Vector), NULL, NULL);
-    buffers[1] = clCreateBuffer(cw.context, CL_MEM_READ_WRITE, SAMPLE_SIZE * sizeof(Vector), NULL, NULL);
-    
+    buffers[0] = clCreateBuffer(cw.context, CL_MEM_READ_WRITE, sizeof(Vector), NULL, NULL);
+
     mlInitKernel(cw.kernel, cw.context, buffers, buffer_count);
 
     // Create the command queue
     cl_command_queue command_queue = clCreateCommandQueueWithProperties(cw.context, cw.pad.device_id, NULL, NULL);
 
     // Host buffer -> Device buffer
-    void * ptrs[2];
-    ptrs[0] = vs;
-    ptrs[1] = vs2;
+    void * i_ptrs[input_param_count];
+    i_ptrs[0] = &vs;
 
     // INPUT
-    mlInputToDevice(command_queue, buffers, buffer_count, SAMPLE_SIZE * sizeof(Vector), ptrs);
+    mlInputToDevice(command_queue, buffers, buffer_count, sizeof(Vector), i_ptrs);
     // Size specification (int nr_of_computations)
-    SizeSpec_t s = mlSizeSpecification(SAMPLE_SIZE);
+    SizeSpec_t s = mlSizeSpecification1D(10,2);
     // Apply the kernel on the range
     mlExecComandQueue(command_queue, cw, s);
     // Host buffer <- Device buffer
+    void * o_ptrs[output_param_count];
+    o_ptrs[0] = &vs;
     // OUTPUT
-    mlOutputFromDevice(command_queue, buffers, buffer_count, SAMPLE_SIZE * sizeof(Vector), ptrs);
-    
+    mlOutputFromDevice(command_queue, buffers, buffer_count,sizeof(Vector), o_ptrs);
+    printf("For %d number of work:\n",vs.n);
     for (int i = 0; i < SAMPLE_SIZE; i++)
     {
-        printf("[%d]: %d,", i, vs[i].a);
-        printf("[%d]: %d,", i, vs[i].b);
-        printf("[%d]: %d,\n", i, vs[i].c);
-    }
-    for (int i = 0; i < SAMPLE_SIZE; i++)
-    {
-        printf("[%d]: %d,", i, vs2[i].a);
-        printf("[%d]: %d,", i, vs2[i].b);
-        printf("[%d]: %d,\n", i, vs2[i].c);
+        printf("[%d]: %d,", i, vs.a[i]);
+        printf("[%d]: %d,", i, vs.b[i]);
+        printf("[%d]: %d,\n", i, vs.c[i]);
     }
     // Release the resources
-    clReleaseKernel(cw.kernel);
-    clReleaseProgram(cw.program);
-    clReleaseContext(cw.context);
-    clReleaseDevice(cw.pad.device_id);
-    free(vs);
-    free(vs2);
+    mlReleaseResources(cw);
 }

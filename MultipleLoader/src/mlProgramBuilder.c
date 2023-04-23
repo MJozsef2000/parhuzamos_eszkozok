@@ -10,7 +10,7 @@ cl_program mlProgramBuilder(const char *const path, cl_device_id device_id, cl_c
 {
   cl_int error_code;
   // Build the program
-  const char *kernel_code = load_kernel_source(path, &error_code);
+  const char *kernel_code = mlLoadKernelFromSource(path, &error_code);
   if (error_code != 0)
   {
     printf("Source code loading error! Source mistake? (%s)\nwith error: %d\n",path,error_code);

@@ -4,8 +4,8 @@
 #include <CL/cl.h>
 typedef struct SizeSpec_s
 {
-  size_t local_work_size;
-  size_t n_work_groups;
-  size_t global_work_size;
+  size_t* global_size;
+  size_t* local_size;
+  cl_uint dim;
 } SizeSpec_t;
 #endif

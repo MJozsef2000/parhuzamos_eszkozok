@@ -13,7 +13,7 @@ void mlInputToDevice(cl_command_queue command_queue, cl_mem input_buffers[], int
       error_code = clEnqueueWriteBuffer(
         command_queue,
         input_buffers[i],     
-        CL_FALSE,
+        CL_TRUE,
         0,
         var_size,       
         ptrs[i],                  
@@ -21,8 +21,11 @@ void mlInputToDevice(cl_command_queue command_queue, cl_mem input_buffers[], int
         NULL,
         NULL);
         if (error_code != CL_SUCCESS){
-          printf("Error while writing to device! Error code: %d", error_code);
+          printf("Error while writing to device! Error code: %d\n", error_code);
         }
+          else{
+            printf("Input received, size: %d\n", var_size);
+          }
   }
   return;
 }

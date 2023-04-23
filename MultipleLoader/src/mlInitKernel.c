@@ -9,7 +9,9 @@ void mlInitKernel(cl_kernel kernel, cl_context context, cl_mem buffers[], int bu
 {
   int i;
   for (i = 0; i<buffer_count; i++){
-    clSetKernelArg(kernel, i, sizeof(cl_mem), (void *)&buffers[i]);
+    cl_int err = clSetKernelArg(kernel, i, sizeof(cl_mem), &buffers[i]);
+    if (err != CL_SUCCESS)
+      printf("Error while setting Kernel arguments: %d\n", err);
   }
   return;
 }
