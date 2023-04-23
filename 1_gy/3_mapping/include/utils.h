@@ -20,4 +20,6 @@ void mlReleaseResources(ClWrapper_t cw);
 
 void reverse();
 void swap();
+void rank();
+void occurance();
 #endif
