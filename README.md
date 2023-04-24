@@ -25,7 +25,7 @@ great advantage to those who just start getting used to it.
 
 ## 1. Initialize the kernel for a method
 ```c
-  ClWrapper_t cw = mlInit("kernels/your_cl_file.cl","your_method");
+ClWrapper_t cw = mlInit("kernels/your_cl_file.cl","your_method");
 ```
 MultipleLoader introduces a bundle which describes the context the kernel runs on, called ClWrapper. This wrapper contains essential information, like the program object, the context, device information, and so on. The user had to initialize these one by one, but now this is taken care of by mlInit, which requires the location and name of the kernel method, and returns an already assembled ClWrapper instance. Note
 that while this is extremely easy, it has it's downsides: Currently ClWrapper is only 
@@ -36,29 +36,29 @@ For streamlining the passing and retrieving of input and output data, they are a
 we declare the following structure:
 ```c
 typedef struct __attribute__ ((packed)) vectors{
-    cl_int a[32]; //Input
-    cl_int b[32]; //Input
-    cl_int c[32]; //Output
-    cl_int n; //Size of array
+  cl_int a[32]; //Input
+  cl_int b[32]; //Input
+  cl_int c[32]; //Output
+  cl_int n; //Size of array
 }Vectors;
 ```
 With the ((packed)) attribute we can ensure the structure arrives in the same memory 
 size as the Kernel awaits it. Do note that the structure has to be declared in the kernel code too, like so:
 ```c
 typedef struct __attribute__ ((packed)) vector{
-    int a[32];
-    int b[32];
-    int c[32];
-    int n;
+  int a[32];
+  int b[32];
+  int c[32];
+  int n;
 }Vector;
 
 __kernel void vector_sum(__global Vector * vs)
 {
-    int GID = get_global_id(0);
-    if (GID < vs->n){
-        vs->c[GID] = vs->a[GID] + vs->b[GID];
-        printf("kernel %d: %d + %d = %d\n",GID,vs->a[GID],vs->b[GID],vs->c[GID]);
-    }
+  int GID = get_global_id(0);
+  if (GID < vs->n){
+    vs->c[GID] = vs->a[GID] + vs->b[GID];
+    printf("kernel %d: %d + %d = %d\n",GID,vs->a[GID],vs->b[GID],vs->c[GID]);
+  }
 }
 ```
 It is recommended to use types provided by OpenCL on the host (CPU) side, but it is not required.
@@ -82,8 +82,8 @@ Once buffers have been initialized, they are passed onto a MultipleLoader functi
 ## 5. Create command queue
 After initializing the kernel, we need to create the command queue which describes a stream of commands we will give to the kernel to execute. This is done by the standard OpenCl clCreateCommandQueueWithProperties function, which takes context and device properties.
 ```c
-    cl_command_queue command_queue = clCreateCommandQueueWithProperties(
-      cw.context, cw.pad.device_id, NULL, NULL);
+cl_command_queue command_queue = clCreateCommandQueueWithProperties(
+  cw.context, cw.pad.device_id, NULL, NULL);
 ```
 Additional parameters include an option to provide more command queue parameters, and a field to catch an error with type cl_error. We leave these fields on NULL, but they can be utilized without interference with the ml API.
 
@@ -91,8 +91,8 @@ Additional parameters include an option to provide more command queue parameters
 The OpenCL way of reading and writing variables (parameters) is by passing them as a 
 unified void * type, so we naturally have to cast our structure(s) to this type as well. One way of doing this is to create a pointer of type void * and cast it upon the structure(s) we wish to pass to the device. For instance, we will create an array of void * pointers, and assign them the structures of data we wish to pass onto the device.
 ```c
-  void * i_ptrs[1];
-  i_ptrs[0] = &vs; // vs is a Vectors variable, already filled with input data
+void * i_ptrs[1];
+i_ptrs[0] = &vs; // vs is a Vectors variable, already filled with input data
 ```
 It is outmost important that if a kernel expects a certain order of parameters, 
 they should be in the EXACT order in the input void * pointers array too.
@@ -101,7 +101,7 @@ they should be in the EXACT order in the input void * pointers array too.
 After assembling the void * for data transfer, we can pass it to a MultipleLoader function which will send every input parameter described in the pointers to the device.
 We need to provide the previously established command queue, buffers and their length, and also the size of the input(s). In case of different sizes, another mlInputToDevice command can be called, providing the corresponding buffers, size and pointers.
 ```c
-    mlInputToDevice(command_queue, buffers, buffer_count, sizeof(Vectors), i_ptrs);
+mlInputToDevice(command_queue, buffers, buffer_count, sizeof(Vectors), i_ptrs);
 ```
 While this process needed a command for every variable in the past, it is now easier to pass similar data structures, especially in the case of smaller operations, where one structure can contain both input and output data.
 
@@ -124,26 +124,26 @@ SizeSpec_t s = mlSizeSpecification2D(32,4,64,8);
 ## 9. Execute (apply) kernel on the range
 After specifying the size requirements to our computations, we can launch the operation on the kernel. For this we provide the command queue, the ClWrapper instance we defined, and the size specifications.
 ```c
-    mlExecComandQueue(command_queue, cw, s);
+mlExecComandQueue(command_queue, cw, s);
 ```
 
 ## 10. Transform the output
 Just like previously described in section 6, OpenCL prefers a void * approach to extracting data from the kernel too. For this purpose, we can either use our input pointers made in step 6 - if the provided structure contains data for the output too, for example a c vector for results - or create another batch of output void * pointers. For the sake of this demonstration, we will create an output pointer array too:
 ```c
-  void * o_ptrs[output_param_count];
-  o_ptrs[0] = &vs; //Vectors variable, contains a field for output
+void * o_ptrs[output_param_count];
+o_ptrs[0] = &vs; //Vectors variable, contains a field for output
 ```
 ## 11. Read data from kernel
 After the kernel is done with computation, its time to use the output pointers to read 
 data from the kernel. The process is very similar to how the input is processed:
 ```c
-  mlOutputFromDevice(command_queue, buffers, buffer_count,sizeof(Vector), o_ptrs);
+mlOutputFromDevice(command_queue, buffers, buffer_count,sizeof(Vector), o_ptrs);
 ```
 
 ## 12. Cleanup
 At the end of the program, it is recommended to free up any OpenCL instances created during the process, as well as other memory spaces taken by the user.
 ```c
-    mlReleaseResources(cw);
+mlReleaseResources(cw);
 ```
 
 # Closing remarks
