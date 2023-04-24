@@ -18,7 +18,7 @@ SizeSpec_t mlSizeSpecification1D(size_t x, size_t sub_x){
   return s;
 }
 
-SizeSpec_t mlSizeSpecification2D(size_t x, size_t y, size_t sub_x, size_t sub_y){
+SizeSpec_t mlSizeSpecification2D(size_t x, size_t sub_x, size_t y, size_t sub_y){
   SizeSpec_t s; 
   s.global_size = (size_t*)malloc(sizeof(size_t)*2);
   s.global_size[0] = x;  //1st dim parameter size

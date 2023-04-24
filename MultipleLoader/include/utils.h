@@ -9,7 +9,7 @@
 cl_program mlProgramBuilder(const char *const path, cl_device_id device_id, cl_context context);
 PlatformAndDevices_t mlGetPlatformAndDevices();
 SizeSpec_t mlSizeSpecification1D(size_t x, size_t sub_x);
-SizeSpec_t mlSizeSpecification2D(size_t x, size_t y, size_t sub_x, size_t sub_y);
+SizeSpec_t mlSizeSpecification2D(size_t x, size_t sub_x, size_t y, size_t sub_y);
 ClWrapper_t mlInit(char * path, char * prg_name);
 char* mlLoadKernelFromSource(const char* const path, cl_int* error_code);
 void mlInitKernel(cl_kernel kernel, cl_context context, cl_mem buffers[], int buffer_size);

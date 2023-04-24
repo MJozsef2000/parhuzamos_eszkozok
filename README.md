@@ -114,6 +114,12 @@ When doing parallel computations, we have to tell the device(s) how much work ne
 //32 computations divided into 4 groups
 SizeSpec_t s = mlSizeSpecification1D(32,4);
 ```
+As the name suggests, this is only for one dimensional problems. For 2 dimensional
+problems, we need to use:
+```c
+//32 computations divided into 4 groups for dimension 1, and 64 computations divided into 8 groups for dimension 2
+SizeSpec_t s = mlSizeSpecification2D(32,4,64,8);
+```
 
 ## 9. Execute (apply) kernel on the range
 After specifying the size requirements to our computations, we can launch the operation on the kernel. For this we provide the command queue, the ClWrapper instance we defined, and the size specifications.
