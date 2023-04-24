@@ -76,7 +76,7 @@ Note that we store the buffers in an array of cl_mem instances. This is needed f
 ## 4. Prepare the kernel for operations with the buffer(s)
 Once buffers have been initialized, they are passed onto a MultipleLoader function which prepares the kernel for the incoming data. For this we need to provide the kernel and context from our ClWrapper, the buffers (which we already initialized), and the number of buffers.
 ```c
-  mlInitKernel(cw.kernel, cw.context, buffers, 1);
+mlInitKernel(cw.kernel, cw.context, buffers, 1);
 ```
 
 ## 5. Create command queue
