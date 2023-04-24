@@ -4,6 +4,7 @@
 
 #define CL_TARGET_OPENCL_VERSION 220
 #include <CL/cl.h>
+#include <CL/cl_ext.h>
 
 
 void mlInputToDevice(cl_command_queue command_queue, cl_mem input_buffers[], int buffer_count, size_t var_size, void * ptrs[])

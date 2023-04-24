@@ -3,6 +3,11 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#define CL_TARGET_OPENCL_VERSION 220
+#include <CL/cl.h>
+#include <CL/cl_ext.h>
+
 SizeSpec_t mlSizeSpecification1D(size_t x, size_t sub_x){
   SizeSpec_t s; 
   s.global_size = (size_t*)malloc(sizeof(size_t));

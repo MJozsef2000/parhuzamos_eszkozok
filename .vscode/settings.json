@@ -4,6 +4,7 @@
     "cl.h": "c",
     "platformanddevices.h": "c",
     "sizespec.h": "c",
-    "stdlib.h": "c"
+    "stdlib.h": "c",
+    "order.h": "c"
   }
 }

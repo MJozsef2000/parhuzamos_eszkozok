@@ -5,6 +5,8 @@
 #include <stdlib.h>
 
 #define CL_TARGET_OPENCL_VERSION 220
+#include <CL/cl.h>
+#include <CL/cl_ext.h>
 
 cl_program mlProgramBuilder(const char *const path, cl_device_id device_id, cl_context context)
 {

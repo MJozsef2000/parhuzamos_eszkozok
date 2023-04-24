@@ -4,7 +4,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#define CL_TARGET_OPENCL_VERSION 220
 #include <CL/cl.h>
+#include <CL/cl_ext.h>
 
 ClWrapper_t mlInit(char * path, char * prg_name)
 {

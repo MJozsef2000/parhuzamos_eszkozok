@@ -6,6 +6,7 @@
 
 #define CL_TARGET_OPENCL_VERSION 220
 #include <CL/cl.h>
+#include <CL/cl_ext.h>
 
 void mlReleaseResources(ClWrapper_t cw){
   clReleaseKernel(cw.kernel);

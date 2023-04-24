@@ -5,6 +5,8 @@
 #include <stdlib.h>
 
 #define CL_TARGET_OPENCL_VERSION 220
+#include <CL/cl.h>
+#include <CL/cl_ext.h>
 
 char* mlLoadKernelFromSource(const char* const path, cl_int* error_code)
 {

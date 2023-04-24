@@ -7,7 +7,7 @@ typedef struct __attribute__ ((packed)) order_s{
     int n;
 }order_t;
 
-typedef struct __attribute__ ((packed)) float_order_s{
+typedef struct __attribute__ ((aligned(16))) float_order_s{
     float order[100];
     int n;
 }float_order_t;

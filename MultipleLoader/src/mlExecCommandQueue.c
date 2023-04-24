@@ -7,7 +7,7 @@
 
 #define CL_TARGET_OPENCL_VERSION 220
 #include <CL/cl.h>
-
+#include <CL/cl_ext.h>
 
 void mlExecComandQueue(cl_command_queue command_queue, ClWrapper_t cw, SizeSpec_t s){
     cl_int error = clEnqueueNDRangeKernel(
