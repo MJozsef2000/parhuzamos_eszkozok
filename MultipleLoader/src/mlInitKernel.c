@@ -1,3 +1,5 @@
+#include "utils.h"
+
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,7 +14,7 @@ void mlInitKernel(cl_kernel kernel, cl_context context, cl_mem buffers[], int bu
   for (i = 0; i<buffer_count; i++){
     cl_int err = clSetKernelArg(kernel, i, sizeof(cl_mem), &buffers[i]);
     if (err != CL_SUCCESS)
-      printf("Error while setting Kernel arguments: %d\n", err);
+      printf("Error while setting Kernel arguments (mlInitKernel : clSetKernelArg): %s\n", mlErrorHandler(err));
   }
   return;
 }

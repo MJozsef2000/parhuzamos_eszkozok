@@ -15,10 +15,12 @@ cl_program mlProgramBuilder(const char *const path, cl_device_id device_id, cl_c
   const char *kernel_code = mlLoadKernelFromSource(path, &error_code);
   if (error_code != 0)
   {
-    printf("Source code loading error! Source mistake? (%s)\nwith error: %d\n",path,error_code);
+    printf("Source code loading error! Source mistake? (%s)\nWith error: %d\n",path,error_code);
     return 0;
   }
-  cl_program program = clCreateProgramWithSource(context, 1, &kernel_code, NULL, NULL);
+  cl_program program = clCreateProgramWithSource(context, 1, &kernel_code, NULL, &error_code);
+  if(error_code != CL_SUCCESS)
+    printf("Error while creating program from source (mlProgramBuilder : clCreateProgramWithSource): %s", mlErrorHandler(error_code));
   error_code = clBuildProgram(
       program,
       1,
@@ -29,7 +31,7 @@ cl_program mlProgramBuilder(const char *const path, cl_device_id device_id, cl_c
   // Error handling in case of faulty program building
   if (error_code != CL_SUCCESS)
   {
-    printf("Build error! Code: %d\n", error_code);
+    printf("Build error! %s\n", mlErrorHandler(error_code));
     size_t real_size;
     error_code = clGetProgramBuildInfo(
         program,

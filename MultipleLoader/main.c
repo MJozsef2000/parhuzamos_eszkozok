@@ -43,7 +43,7 @@ int main(void)
     // INPUT
     mlInputToDevice(command_queue, buffers, buffer_count, sizeof(Vector), i_ptrs);
     // Size specification (Number of threads, number of subtrheads)
-    SizeSpec_t s = mlSizeSpecification1D(10,2);
+    SizeSpec_t s = mlSizeSpecification1D(5,1);
     // Apply the kernel on the range
     mlExecComandQueue(command_queue, cw, s);
     // Host buffer <- Device buffer

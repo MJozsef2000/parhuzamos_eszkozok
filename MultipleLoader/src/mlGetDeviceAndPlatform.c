@@ -1,4 +1,5 @@
 #include "PlatformAndDevices.h"
+#include "utils.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,9 +17,7 @@ PlatformAndDevices_t mlGetPlatformAndDevices()
     cl_platform_id platform_id;
     error_code = clGetPlatformIDs(1, &platform_id, &n_platforms);
     if (error_code != CL_SUCCESS)
-    {
-        printf("[ERROR] Error calling clGetPlatformIDs. Error code: %d\n", error_code);
-    }
+        printf("Error while getting platform ID(s) (mlGetPlatformAndDevices : clGetPlatformIDs): %s\n", mlErrorHandler(error_code));
 
     // Get device
     cl_device_id device_id;
@@ -30,9 +29,7 @@ PlatformAndDevices_t mlGetPlatformAndDevices()
         &device_id,
         &n_devices);
     if (error_code != CL_SUCCESS)
-    {
-        printf("[ERROR] Error calling clGetDeviceIDs. Error code: %d\n", error_code);
-    }
+        printf("Error while retrieving device ID(s) (mlGetPlatformAndDevices : clGetDeviuceIDs): %s\n", mlErrorHandler(error_code));
     pad.device_id = device_id;
     pad.n_devices = n_devices;
     return pad;

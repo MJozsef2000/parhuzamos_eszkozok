@@ -13,8 +13,9 @@ SizeSpec_t mlSizeSpecification2D(size_t x, size_t sub_x, size_t y, size_t sub_y)
 ClWrapper_t mlInit(char * path, char * prg_name);
 char* mlLoadKernelFromSource(const char* const path, cl_int* error_code);
 void mlInitKernel(cl_kernel kernel, cl_context context, cl_mem buffers[], int buffer_size);
-void mlInputToDevice(cl_command_queue command_queue, cl_mem input_buffers[], int buffer_count, size_t var_size, const void * ptr);
-void mlOutputFromDevice(cl_command_queue command_queue, cl_mem output_buffers[], int buffer_count, size_t var_size, const void * ptr);
+void mlInputToDevice(cl_command_queue command_queue, cl_mem input_buffers[], int buffer_count, size_t var_size, void * ptrs[]);
+void mlOutputFromDevice(cl_command_queue command_queue, cl_mem output_buffers[], int buffer_count, size_t var_size, void * ptrs[]);
 void mlExecComandQueue(cl_command_queue command_queue, ClWrapper_t cw, SizeSpec_t s);
 void mlReleaseResources(ClWrapper_t cw);
+const char *mlErrorHandler(int error);
 #endif

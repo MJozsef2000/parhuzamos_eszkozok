@@ -9,4 +9,6 @@ all:
 	gcc -Iinclude/ -c src/mlProgramBuilder.c -o mlProgramBuilder.o
 	gcc -Iinclude/ -c src/mlInitKernel.c -o mlInitKernel.o
 	gcc -Iinclude/ -c src/mlGetDeviceAndPlatform.c -o mlGetDeviceAndPlatform.o
-	ar rcs ml.a mlSizeSpecification.o mlLoadKernelFromSource.o mlReleaseResources.o mlOutputFromDevice.o mlExecCommandQueue.o mlInit.o mlInputToDevice.o mlProgramBuilder.o mlInitKernel.o mlGetDeviceAndPlatform.o
+	gcc -Iinclude/ -c src/mlErrorHandler.c -o mlErrorHandler.o
+	ar rcs ml.a mlSizeSpecification.o mlLoadKernelFromSource.o mlReleaseResources.o mlOutputFromDevice.o mlExecCommandQueue.o mlInit.o mlInputToDevice.o mlProgramBuilder.o mlInitKernel.o mlGetDeviceAndPlatform.o mlErrorHandler.o
+	gcc main.c -o main.exe -Iinclude .\ml.a -lOpenCL 

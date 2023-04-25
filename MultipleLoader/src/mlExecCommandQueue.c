@@ -1,5 +1,6 @@
 #include "ClWrapper.h"
 #include "SizeSpec.h"
+#include "utils.h"
 
 #include <stddef.h>
 #include <stdio.h>
@@ -21,7 +22,9 @@ void mlExecComandQueue(cl_command_queue command_queue, ClWrapper_t cw, SizeSpec_
         NULL,
         NULL);
     if (error != CL_SUCCESS)
-        printf("Error while applying Kernel on range: %d\n", error);
+        printf("\nError while applying Kernel on range (mlExecCommandQueue : clEnqueueNDRangeKernel): %s\n", mlErrorHandler(error));
 
-clFinish(command_queue);
+    error = clFinish(command_queue);
+    if (error != CL_SUCCESS)
+        printf("\nError while awaiting command queue (mlExecCommandQueue : clFinish): %s\n", mlErrorHandler(error));
 }

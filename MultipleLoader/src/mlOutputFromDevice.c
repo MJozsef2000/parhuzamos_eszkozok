@@ -1,3 +1,5 @@
+#include "utils.h"
+
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,9 +22,8 @@ void mlOutputFromDevice(cl_command_queue command_queue, cl_mem output_buffers[],
         0,
         NULL,
         NULL);
-        if (error_code != CL_SUCCESS){
-          printf("Error while reading from device! Error code: %d\n", error_code);
-        }
+        if (error_code != CL_SUCCESS)
+          printf("Error while reading from device (mlOutputFromDevice : clEnqueueReadBuffer) %s\n", mlErrorHandler(error_code));
   }
   return;
 }

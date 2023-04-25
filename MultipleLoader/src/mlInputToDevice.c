@@ -1,3 +1,5 @@
+#include "utils.h"
+
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -5,7 +7,6 @@
 #define CL_TARGET_OPENCL_VERSION 220
 #include <CL/cl.h>
 #include <CL/cl_ext.h>
-
 
 void mlInputToDevice(cl_command_queue command_queue, cl_mem input_buffers[], int buffer_count, size_t var_size, void * ptrs[])
 {
@@ -21,9 +22,8 @@ void mlInputToDevice(cl_command_queue command_queue, cl_mem input_buffers[], int
         0,
         NULL,
         NULL);
-        if (error_code != CL_SUCCESS){
-          printf("Error while writing to device! Error code: %d\n", error_code);
-        }
+      if (error_code != CL_SUCCESS)
+        printf("Error while writing to device (mlInputDevice : clEnqueueWriteBuffer): %s\n", mlErrorHandler(error_code));
   }
   return;
 }
